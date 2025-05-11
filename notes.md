@@ -16,14 +16,37 @@ Steps:
 
 Files to modify:
 - 
-- login.py
-- mtp.py
-- server.py
-- client.py
+- login.py (Bulk of work)
+- mtp.py (Bulk of work)
+- server.py (implement RSA key-pair)
+- client.py (implement RSA key-pair)
 
 * generate an RSA key-pair for the server.
-  For this, you can write a standalone utility program based on what you did in the corresponding exercise session.
-  You should export and save the public key and the key-pair in different files (e.g., in PEM format),
-  and put the key-pair file in the server folder and the public key file in the client folder.
-* So your server and client programs can read these keys from those files and pass them to the login
+  - For this, you can write a standalone utility program based on what you did in the corresponding exercise session.
+  - You should export and save the public key and the key-pair in different files (e.g., in PEM format), 
+    and put the key-pair file in the server folder and the public key file in the client folder. 
+  - **Purpose**: So your server and client programs can read these keys from those files and pass them to the login
   protocol that will use them for the session key establishment. 
+
+Tasks:
+- 
+- TASK ONE:
+  - 
+  - generate RSA key-pair 
+    - e.g. complete the exersice session notebook
+  -  export and save the public key and the key-pair in different files (e.g., in PEM format)
+  
+- TASK TWO:
+  - 
+  - modify server.py and client.py to contain the keys 
+    - put the key-pair file in the server folder 
+    - public key file in the client folder. 
+  GOAL: server and client programs read these keys from files and pass them to the login protocol for the session key establishment.
+
+- TASK THREE:
+  - 
+  - modify login.py to match SiFT v1.0 specifications
+  
+- TASK FOUR:
+  - 
+  - modify mtp.py to match SiFT v1.0 specifications
