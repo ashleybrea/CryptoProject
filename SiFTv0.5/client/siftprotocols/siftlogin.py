@@ -21,7 +21,7 @@ class SiFT_LOGIN:
         self.coding = 'utf-8'
         # --------- STATE ------------
         self.mtp = mtp
-        self.server_users = None
+        self.server_users = None 
 
 
     # sets user passwords dictionary (to be used by the server)
@@ -33,7 +33,7 @@ class SiFT_LOGIN:
     def build_login_req(self, login_req_struct):
         login_req_str = str(login_req_struct['timestamp'])
         login_req_str += self.delimiter + login_req_struct['username']
-        login_req_str += self.delimiter + login_req_struct['password']
+        login_req_str += self.delimiter + login_req_struct['password'] 
         login_req_str += self.delimiter + login_req_struct['client_random'].hex() # Type: Byte String
         return login_req_str.encode(self.coding)
 
@@ -53,8 +53,8 @@ class SiFT_LOGIN:
     # builds a login response from a dictionary
     def build_login_res(self, login_res_struct):
 
-        login_res_str = login_res_struct['request_hash'].hex()
-        login_res_str += self.delimiter + login_res_struct['server_random'].hex()
+        login_res_str = login_res_struct['request_hash'].hex() 
+        login_res_str += self.delimiter + login_res_struct['server_random'].hex() 
         return login_res_str.encode(self.coding)
 
 
@@ -87,12 +87,12 @@ class SiFT_LOGIN:
         except SiFT_MTP_Error as e:
             raise SiFT_LOGIN_Error('Unable to receive login request --> ' + e.err_msg)
 
-        # DEBUG
+        # DEBUG 
         if self.DEBUG:
             print('Incoming payload (' + str(len(msg_payload)) + '):')
             print(msg_payload[:max(512, len(msg_payload))].decode('utf-8'))
             print('------------------------------------------')
-        # DEBUG
+        # DEBUG 
 
         if msg_type != self.mtp.type_login_req:
             raise SiFT_LOGIN_Error('Login request expected, but received something else')
@@ -101,6 +101,7 @@ class SiFT_LOGIN:
         hash_fn = SHA256.new()
         hash_fn.update(msg_payload)
         request_hash = hash_fn.digest()
+        print("server request hash ", request_hash.hex())
 
         login_req_struct = self.parse_login_req(msg_payload)
 
@@ -123,12 +124,12 @@ class SiFT_LOGIN:
         print("server random: ", login_res_struct['server_random'].hex())
         msg_payload = self.build_login_res(login_res_struct)
 
-        # DEBUG
+        # DEBUG 
         if self.DEBUG:
             print('Outgoing payload (' + str(len(msg_payload)) + '):')
             print(msg_payload[:max(512, len(msg_payload))].decode('utf-8'))
             print('------------------------------------------')
-        # DEBUG
+        # DEBUG 
 
         # sending login response
         try:
@@ -136,19 +137,19 @@ class SiFT_LOGIN:
         except SiFT_MTP_Error as e:
             raise SiFT_LOGIN_Error('Unable to send login response --> ' + e.err_msg)
         
-        initial_key_material = (bytes.fromhex(login_req_struct['client_random']) +
+        initial_key_material = (bytes.fromhex(login_req_struct['client_random']) + 
                         login_res_struct['server_random'])
         print("server side client random: ", login_req_struct['client_random'])
-        print("initial key material: ", initial_key_material.hex())
+        print("initial key material: ", initial_key_material.hex())    
         salt = request_hash
         final_transfer_key = HKDF(initial_key_material, 32, salt, SHA256, 1)
         print("final transfer key: ", final_transfer_key.hex())
         self.mtp.set_final_transfer_key(final_transfer_key)
 
-        # DEBUG
+        # DEBUG 
         if self.DEBUG:
             print('User ' + login_req_struct['username'] + ' logged in')
-        # DEBUG
+        # DEBUG 
 
         return login_req_struct['username']
 
@@ -165,12 +166,12 @@ class SiFT_LOGIN:
         print(login_req_struct['client_random'].hex())
         msg_payload = self.build_login_req(login_req_struct)
 
-        # DEBUG
+        # DEBUG 
         if self.DEBUG:
             print('Outgoing payload (' + str(len(msg_payload)) + '):')
             print(msg_payload[:max(512, len(msg_payload))].decode('utf-8'))
             print('------------------------------------------')
-        # DEBUG
+        # DEBUG 
 
         # trying to send login request
         try:
@@ -183,18 +184,20 @@ class SiFT_LOGIN:
         hash_fn.update(msg_payload)
         request_hash = hash_fn.digest()
 
+        print("client request hash: ", request_hash.hex())
+
         # trying to receive a login response
         try:
             msg_type, msg_payload = self.mtp.receive_msg()
         except SiFT_MTP_Error as e:
             raise SiFT_LOGIN_Error('Unable to receive login response --> ' + e.err_msg)
 
-        # DEBUG
+        # DEBUG 
         if self.DEBUG:
             print('Incoming payload (' + str(len(msg_payload)) + '):')
             print(msg_payload[:max(512, len(msg_payload))].decode('utf-8'))
             print('------------------------------------------')
-        # DEBUG
+        # DEBUG 
 
         if msg_type != self.mtp.type_login_res:
             raise SiFT_LOGIN_Error('Login response expected, but received something else')
@@ -207,7 +210,7 @@ class SiFT_LOGIN:
             raise SiFT_LOGIN_Error('Verification of login response failed')
         else:
             initial_key_material = login_req_struct['client_random'] + login_res_struct['server_random']
-            print("initial key material: ", initial_key_material.hex())
+            print("initial key material: ", initial_key_material.hex()) 
             salt = request_hash
             final_transfer_key = HKDF(initial_key_material, 32, salt, SHA256, 1)
             print("final transfer key: ", final_transfer_key.hex())
