@@ -212,7 +212,7 @@ class SiFT_LOGIN:
             initial_key_material = login_req_struct['client_random'] + login_res_struct['server_random']
             print("initial key material: ", initial_key_material.hex()) 
             salt = request_hash
-            final_transfer_key = HKDF(initial_key_material, 32, salt, SHA256, 1)
+            final_transfer_key =HKDF(initial_key_material,  32, salt, SHA256, 1)
             print("final transfer key: ", final_transfer_key.hex())
             self.mtp.set_final_transfer_key(final_transfer_key)
 
