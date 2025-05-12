@@ -101,13 +101,13 @@ class SiFT_LOGIN:
         hash_fn = SHA256.new()
         hash_fn.update(msg_payload)
         request_hash = hash_fn.digest()
-        print("server request hash ", request_hash.hex())
 
         login_req_struct = self.parse_login_req(msg_payload)
 
         # check the timstamp
         current_time = time.time_ns()
         if (current_time - int(login_req_struct['timestamp'])< 2e+9):
+            print('Timestamp verification successful')
             # checking username and password
             if login_req_struct['username'] in self.server_users:
                 if not self.check_password(login_req_struct['password'], self.server_users[login_req_struct['username']]):
@@ -121,7 +121,6 @@ class SiFT_LOGIN:
         login_res_struct = {}
         login_res_struct['request_hash'] = request_hash
         login_res_struct['server_random'] = token_bytes(16) # Type: ByteString
-        print("server random: ", login_res_struct['server_random'].hex())
         msg_payload = self.build_login_res(login_res_struct)
 
         # DEBUG 
@@ -139,17 +138,13 @@ class SiFT_LOGIN:
         
         initial_key_material = (bytes.fromhex(login_req_struct['client_random']) + 
                         login_res_struct['server_random'])
-        print("server side client random: ", login_req_struct['client_random'])
-        print("initial key material: ", initial_key_material.hex())    
         salt = request_hash
         final_transfer_key = HKDF(initial_key_material, 32, salt, SHA256, 1)
-        print("final transfer key: ", final_transfer_key.hex())
         self.mtp.set_final_transfer_key(final_transfer_key)
 
         # DEBUG 
         if self.DEBUG:
             print('User ' + login_req_struct['username'] + ' logged in')
-        # DEBUG 
 
         return login_req_struct['username']
 
@@ -184,8 +179,6 @@ class SiFT_LOGIN:
         hash_fn.update(msg_payload)
         request_hash = hash_fn.digest()
 
-        print("client request hash: ", request_hash.hex())
-
         # trying to receive a login response
         try:
             msg_type, msg_payload = self.mtp.receive_msg()
@@ -210,10 +203,8 @@ class SiFT_LOGIN:
             raise SiFT_LOGIN_Error('Verification of login response failed')
         else:
             initial_key_material = login_req_struct['client_random'] + login_res_struct['server_random']
-            print("initial key material: ", initial_key_material.hex()) 
             salt = request_hash
-            final_transfer_key =HKDF(initial_key_material,  32, salt, SHA256, 1)
-            print("final transfer key: ", final_transfer_key.hex())
+            final_transfer_key = HKDF(initial_key_material, 32, salt, SHA256, 1)
             self.mtp.set_final_transfer_key(final_transfer_key)
 
 
